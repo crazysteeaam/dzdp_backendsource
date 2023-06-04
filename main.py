@@ -215,6 +215,83 @@ async def userbook():
         "matrix_data": matrix_data,
     }}
 
+@app.get("/apriori")
+async def apriori_main():
+    df = getdata.readcsv('static/大众点评评论数据.csv')
+    df_dish = df['Favorite_foods']
+    df_dish.dropna(inplace=True)
+    # 将df_dish转换为data的形式
+    data = []
+    for i in df_dish:
+        # 去掉前后的空格，将中间的空格作为分隔符
+        i = i.strip().replace(' ', ',')
+        # 将字符串转换为列表
+        i = i.split(',')
+        data.append(i)
+
+    te = TransactionEncoder()
+    te_ary = te.fit(data).transform(data)
+    df_dish_bool = pd.DataFrame(te_ary, columns=te.columns_)
+    frequent_itemsets = apriori(df_dish_bool, min_support=0.005, use_colnames=True)
+    rules = association_rules(frequent_itemsets, metric="confidence", min_threshold=0.5)
+    relation_data = []
+    for i in range(len(rules)):
+        relation_data.append({
+            "antecedents": list(rules.iloc[i, 0]),
+            "consequents": list(rules.iloc[i, 1]),
+            "antecedent_support": round(rules.iloc[i, 2], 4),
+            "consequent_support": round(rules.iloc[i, 3], 4),
+            "support": round(rules.iloc[i, 4], 4),
+            "confidence": round(rules.iloc[i, 5], 2),
+            "lift": round(rules.iloc[i, 6], 2),
+            "leverage": round(rules.iloc[i, 7], 2),
+            "conviction": round(rules.iloc[i, 8], 2),
+            "zhangs_metric": round(rules.iloc[i, 9], 2)
+        })
+
+    return {"message": {
+        "relation_data": relation_data,
+    }}
+
+@app.get("/apriori/{min_support}")
+async def apriori_main(min_support: float):
+    print(min_support)
+    df = getdata.readcsv('static/大众点评评论数据.csv')
+    df_dish = df['Favorite_foods']
+    df_dish.dropna(inplace=True)
+    # 将df_dish转换为data的形式
+    data = []
+    for i in df_dish:
+        # 去掉前后的空格，将中间的空格作为分隔符
+        i = i.strip().replace(' ', ',')
+        # 将字符串转换为列表
+        i = i.split(',')
+        data.append(i)
+
+    te = TransactionEncoder()
+    te_ary = te.fit(data).transform(data)
+    df_dish_bool = pd.DataFrame(te_ary, columns=te.columns_)
+    frequent_itemsets = apriori(df_dish_bool, min_support=min_support, use_colnames=True)
+    rules = association_rules(frequent_itemsets, metric="confidence", min_threshold=0.5)
+    relation_data = []
+    for i in range(len(rules)):
+        relation_data.append({
+            "antecedents": list(rules.iloc[i, 0]),
+            "consequents": list(rules.iloc[i, 1]),
+            "antecedent_support": round(rules.iloc[i, 2], 4),
+            "consequent_support": round(rules.iloc[i, 3], 4),
+            "support": round(rules.iloc[i, 4], 4),
+            "confidence": round(rules.iloc[i, 5], 2),
+            "lift": round(rules.iloc[i, 6], 2),
+            "leverage": round(rules.iloc[i, 7], 2),
+            "conviction": round(rules.iloc[i, 8], 2),
+            "zhangs_metric": round(rules.iloc[i, 9], 2)
+        })
+
+    return {"message": {
+        "relation_data": relation_data,
+    }}
+
 
 @app.get("/marketing")
 async def marketing_main():

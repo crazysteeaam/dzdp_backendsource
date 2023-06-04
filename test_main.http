@@ -12,3 +12,15 @@ Accept: application/json
 
 GET http://127.0.0.1:8000/analyze_data1/炳胜品味(珠江新城店)
 Accept: application/json
+
+###
+
+GET http://127.0.0.1:8000/userbook
+Accept: application/json
+
+###
+
+GET http://127.0.0.1:8000/marketing
+Accept: application/json
+
+###
